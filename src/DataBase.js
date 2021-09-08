@@ -21,7 +21,7 @@ const useStyles = makeStyles(theme => ({
 	tableSpacing: { marginTop: "3vh" }
 }));
 
-export default function DataBase(){
+export default function DataBase(props){
 	const classes = useStyles();
 
 	return(
@@ -38,7 +38,7 @@ export default function DataBase(){
 					{[0, 1, 2, 3, 4].map(column => (
 						<TableRow align="right">
 							{[0, 1, 2, 3, 4].map(row => (
-								<TableCell className={classes.tableBodyColors}>{column.toString()+row}</TableCell>	
+								<TableCell className={classes.tableBodyColors}>{props.value}</TableCell>	
 							))}
 						</TableRow>
 					))}
