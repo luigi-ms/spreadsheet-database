@@ -12,11 +12,11 @@ import DataBase from './DataBase.js';
 import PlayArrow from '@material-ui/icons/PlayArrow';
 
 const commands = [
-	"INSERT-INTO [value, column]",
+	"CREATE-TABLE [columsArray]",
+	"INSERT-INTO [valuesArray]",
 	"SELECT-FROM [value, column]",
-	"UPDATE-TO-WHERE [column, newValue, value]",
-	"DELETE-FROM [value, column]",
-	"ALTER-NAME-TO [column, newName]"
+	"UPDATE-TO-WHERE [column, newValue, identifier]",
+	"DELETE-WHERE [column, value]"
 ];
 
 const useStyles = makeStyles(theme => ({

@@ -31,6 +31,9 @@ export default function DataBase(props){
 					<TableRow align="right">
 						{defaultColumnNames.map(name => (
 							<TableCell className={classes.tableHeadColors}>{name}</TableCell>
+							//counter para quantas colunas existem. Resumir toda  a
+							//tabela para um array. Depois enviar tanto o counter quanto o
+							//array pro servidor
 						))}
 					</TableRow>
 				</TableHead>
