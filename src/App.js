@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
@@ -32,7 +33,16 @@ function sendQuery(data){
 
 export default function App(props) {
 	const classes = useStyles();
-	let [value, setValue] = useState('');
+	const api = axios.create({ baseURL: "http://localhost:5000" });
+
+	let [query, setQuery] = useState('');
+	let [data, setData] = useState({ columns: [], rows: [['']] });
+
+	useEffect(() => {
+		api.get("/all-data")
+			.then(res => setData(res.data))
+			.catch(err => setData(err))
+	});
 
   return (
     <div className="App">
@@ -43,7 +53,7 @@ export default function App(props) {
 					<Typography variant="h5" align="center">SpreadSheet Database</Typography>
 				</Grid>
 				<Grid item xs={8}>
-					<TextField onChange={ e=> setValue(e.target.value) } 
+					<TextField onChange={ e=> setQuery(e.target.value) } 
 						label="Insira um comando SQL" 
 						variant="filled"
 						fullWidth/>
@@ -51,10 +61,10 @@ export default function App(props) {
 				<Grid item xs={2}>
 					<Button variant="contained" 
 						color="primary"
-						onClick={ () => sendQuery(value) }><PlayArrow/></Button>
+						onClick={ () => sendQuery(query) }><PlayArrow/></Button>
 				</Grid>
 				<Grid item xs={11}>
-					<DataBase value={value}/>
+					<DataBase columns={data.columns} rows={data.rows}/>
 				</Grid>
 				<Grid item xs={10} className={classes.title}>
 					<Paper>

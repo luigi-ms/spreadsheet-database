@@ -7,8 +7,6 @@ import TableRow from '@material-ui/core/TableRow';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 
-let defaultColumnNames = ["column01", "column02", "column03", "column04", "column05"];
-
 const useStyles = makeStyles(theme => ({
 	tableHeadColors: {
 		backgroundColor: "rgb(16, 29, 37)",
@@ -29,22 +27,19 @@ export default function DataBase(props){
 			<Table aria-label="Spreadsheet" color="primary">
 				<TableHead>
 					<TableRow align="right">
-						{defaultColumnNames.map(name => (
-							<TableCell className={classes.tableHeadColors}>{name}</TableCell>
-							//counter para quantas colunas existem. Resumir toda  a
-							//tabela para um array. Depois enviar tanto o counter quanto o
-							//array pro servidor
-						))}
+					{props.columns.map(col => (
+						<TableCell className={classes.tableHeadColors}>{col}</TableCell>
+					))}
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{[0, 1, 2, 3, 4].map(column => (
-						<TableRow align="right">
-							{[0, 1, 2, 3, 4].map(row => (
-								<TableCell className={classes.tableBodyColors}>{props.value}</TableCell>	
-							))}
-						</TableRow>
+				{props.rows.map(row => (
+					<TableRow align="right">{
+					row.map(cell => (
+						<TableCell className={classes.tableBodyColors}>{cell}</TableCell>
 					))}
+					</TableRow>
+				))}
 				</TableBody>
 			</Table>
 		</TableContainer>

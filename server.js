@@ -1,9 +1,11 @@
-const express = require('express');
-const parser = require('body-parser');
+const express = require('express'),
+			parser = require('body-parser'),
+			cors = require('cors');
+
 const app = express();
 const table = {
-  columnsNames: [],
-  rows: []
+  columnsNames: ['a', 'b', 'c', 'd'],
+  rows: [[1, 2, 3, 4], [5, 6, 7, 8]]
 }
 
 function getColumnIndex(columnName){
@@ -24,6 +26,12 @@ function existsInTable(data){
 
 app.use(parser.json());
 app.use(parser.urlencoded({ extended: true }));
+app.use(cors());
+
+//GET ALL DATA
+app.get('/all-data', (req, res) => {
+	res.send({ columns: table.columnsNames, rows: table.rows });
+});
 
 //SELECT
 app.get('/data', (req, res) => {
@@ -70,9 +78,9 @@ app.delete('/data/erase', (req, res) =>{
 //CREATE
 app.post('/table/new', (req, res) => {
   table.columnsNames = req.body.columnsNames;
-  res.send(table.columnsNames);
+  res.send({ columns: table.columnsNames });
 });
 
-app.listen(3000, () => {
-	console.log("Running at http://localhost:3000");
+app.listen(5000, () => {
+	console.log("Running at http://localhost:5000");
 });
