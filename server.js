@@ -18,13 +18,13 @@ function getRowIndex(value){
 	return rowIndex;
 }
 
-async function columnExists(column){
-	const existsAsColumn = await table.columnsNames.some(col => col === column);
+function columnExists(column){
+	const existsAsColumn = table.columnsNames.some(col => col === column);
 	return existsAsColumn ? true : false;
 }
 
-async function valueExists(value = ""){
-	const existsAsData = await table.rows.some(row => row.some(cell => cell === value));
+function valueExists(value = ""){
+	const existsAsData = table.rows.some(row => row.some(cell => cell === value));
 	return existsAsData ? true : false;
 }
 

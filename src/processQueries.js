@@ -1,14 +1,17 @@
-import axios from 'axios';
+const table = {
+	columnsNames: [],
+	rows: [[]]
+};
 
 const commands = {
-	select: selectFrom,
+	select: selectRowWhere,
 	create: createTable,
 	insert: insertInto,
 	delete: deleteWhere,
 	update: updateToWhere
 };
 
-export default function processQuery(query){
+export function processQuery(query){
 	const com = query.substring(0, 6).toLowerCase();
 	let params = "";
 	
@@ -20,38 +23,87 @@ export default function processQuery(query){
 	commands[com](params);
 }
 
-function selectFrom([col, val]){
-	axios.get("http://localhost:5000/data", { params: { column: col, value: val } })
-		.then(res => console.log("Selected: "+res.data.found))
-		.catch(err => console.log("SelectError: "+err));
+export function getAllData(){
+	return {
+		columns: table.columnsNames,
+		rows: table.rows
+	}
+}
+
+function getColumnIndex(column){
+	return table.columnsNames.findIndex(col => col === column);
+}
+
+function getRowIndex(row){
+	return table.rows.findIndex(row => row.some(cell => cell === row));
+}
+
+function thisColumnExists(column){
+	const exists = table.columnsNames.some(col => col === column);
+	return exists ? true : false;
+}
+
+function thisDatumExists(datum){
+	const exists = table.rows.some(row => row.some(cell => cell === datum));
+	return exists ? true : false;
+}
+
+async function selectRowWhere([col, val]){
+	try{
+		const thereIsThisColumn = await thisColumnExists(col);
+		const thereIsThisValue = await thisDatumExists(val);
+
+		if(thereIsThisColumn && thereIsThisValue){
+			const rowIndex = getRowIndex(val);
+			return { found: table.rows[rowIndex]}
+		}else{
+			return { error: "Informação inexistente" }
+		}
+	}catch(err){
+		console.log("SelectError: "+err);
+	}
 }
 
 function createTable(columnsArray){
-	axios.post("http://localhost:5000/table/new/", { columnsNames: columnsArray })
-		.then(res => console.log("Created: "+res.data.columns))
-		.catch(err => console.log("CreateError: "+err));
+	table.columnsNames = columnsArray;
+	return { columns: table.columnsNames }
 }
 
 function insertInto(valuesArray){
-	axios.post("http://localhost:5000/data/new", { values: valuesArray })
-		.then(res => console.log("Inserted: "+res.data))
-		.catch(err => console.log("InsertError: "+err));
+	table.rows.push(valuesArray);
+	return { rows: table.rows }
 }
 
-function deleteWhere([col, val]){
-	axios.delete("http://localhost:5000/data/erase", { params: { column: col, value: val} })
-		.then(res => console.log("Deleted: "+res.data.updated))
-		.catch(err => console.log("DeleteError: "+err));
+async function deleteWhere([col, val]){
+	try{
+		const thereIsThisColumn = await thisColumnExists(col);
+		const thereIsThisValue = await thisDatumExists(val);
+
+		if(thereIsThisColumn && thereIsThisValue){
+			const rowIndex = getRowIndex(val);
+			table.rows = table.rows.filter((row, index) => index !== rowIndex);
+			return { updated: table.rows };
+		}else{
+			return { error: "Informação inexistente" }
+		}
+	}catch(err){
+		console.log("DeleteError: "+err);
+	}
 }
 
-function updateToWhere([col, newName, actualValue]){
-	axios.put("http://localhost:5000/data/change", { column: col, id: actualValue, newValue: newName })
-		.then(res => console.log("Updated: "+res.data.updated))
-		.catch(err => console.log("UpdateError: "+err));
-}
+async function updateToWhere([col, newValue, actualValue]){
+	try{
+		const thereIsThisColumn = await thisColumnExists(col);
+		const thereIsThisValue = await thisDatumExists(actualValue);
 
-//processQuery("CREATE-TABLE [\"id\", \"nome\", \"cpf\"]");
-//processQuery("INSERT-INTO [\"1\", \"luigi\", \"07099519301\"]")
-//processQuery("SELECT-ROW-WHERE [\"id\", \"1\"]");
-//processQuery("UPDATE-TO-WHERE [\"nome\", \"miguel\", \"luigi\"]");
-//processQuery("DELETE-WHERE [\"id\", \"1\"]");
+		if(thereIsThisColumn && thereIsThisValue){
+			const [colIndex, rowIndex] = [getColumnIndex(col), getRowIndex(actualValue)];
+			table.rows[rowIndex][colIndex] = newValue;
+			return { updated: table.rows[rowIndex] };
+		}else{
+			return { error: "Informação inexistente" };
+		}
+	}catch(err){
+		console.log("UpdateError: "+err);
+	}
+}
