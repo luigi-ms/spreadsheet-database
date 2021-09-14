@@ -4,8 +4,8 @@ const express = require('express'),
 
 const app = express();
 const table = {
-  columnsNames: ['a', 'b', 'c', 'd'],
-  rows: [[1, 2, 3, 4], [5, 6, 7, 8]]
+  columnsNames: [],
+  rows: []
 }
 
 function getColumnIndex(columnName){
@@ -18,10 +18,14 @@ function getRowIndex(value){
 	return rowIndex;
 }
 
-function existsInTable(data){
-	const existsAsColumn = table.columnsNames.some(col => col === data);
-	const existsAsData = table.rows.some(row => row.some(value => value === data));
-	return (existsAsColumn || existsAsData) ? true : false;
+async function columnExists(column){
+	const existsAsColumn = await table.columnsNames.some(col => col === column);
+	return existsAsColumn ? true : false;
+}
+
+async function valueExists(value = ""){
+	const existsAsData = await table.rows.some(row => row.some(cell => cell === value));
+	return existsAsData ? true : false;
 }
 
 app.use(parser.json());
@@ -34,14 +38,24 @@ app.get('/all-data', (req, res) => {
 });
 
 //SELECT
-app.get('/data', (req, res) => {
-	const [col, value] = [req.body.column, req.body.value];
-	if(existsInTable(col) && existsInTable(value)){
-		const [colIndex, rowIndex] = [getColumnIndex(col), getRowIndex(value)];
-		res.send({ found: table.rows[rowIndex][colIndex] });
-	}else{
-		res.send({ error: "Informação inexistente" });
-	}
+app.get('/data', async function(req, res){
+	const [col, value] = [req.query.column, req.query.value];
+
+	try{
+		const foo = await valueExists(value);
+		const	column = await columnExists(col);
+
+		if(foo && column){
+			const [colIndex, rowIndex] = [getColumnIndex(col), getRowIndex(value)];
+			res.send({ found: table.rows[rowIndex][colIndex] });
+		}else{
+			res.send({ error: "Informação inexistente" });
+			res.status(404);
+		}
+	}catch(err){
+		console.log("getError: "+err);
+		res.status(500);
+	}	
 });
 
 //INSERT
@@ -51,28 +65,47 @@ app.post('/data/new', (req, res) => {
 });
 
 //UPDATE
-app.put('/data/change', (req, res) => {
+app.put('/data/change', async function(req, res){
 	const [col, id, newValue] = [req.body.column, req.body.id, req.body.newValue];
-	if(existsInTable(col) && existsInTable(id)){
-		const [colIndex, rowIndex] = [getColumnIndex(col), getRowIndex(id)];
-		table.rows[rowIndex][colIndex] = newValue;
-		res.send({ updated: table.rows[rowIndex] });
-	}else{
-		res.send({ error: "Informação inexistente" });
+
+	try{
+		const thereIsValue = await valueExists(id);
+		const thereIsColumn = await columnExists(col);
+
+		if(thereIsValue && thereIsColumn){
+			const [colIndex, rowIndex] = [getColumnIndex(col), getRowIndex(id)];
+			table.rows[rowIndex][colIndex] = newValue;
+			res.send({ updated: table.rows[rowIndex] });
+		}else{
+			res.send({ error: "Informação inexistente" });
+			res.status(404);
+		}
+	}catch(err){
+		console.log("putError: "+err);
+		res.status(500);
 	}
 });
 
 //DELETE
-app.delete('/data/erase', (req, res) =>{
-	const [column, value] = [req.body.column, req.body.value];
-  if(existsInTable(column) && existsInTable(value)){
-    const rowIndex = getRowIndex(value);
-		table.rows = table.rows.filter((row, index) => index !== rowIndex);
-		res.send({ updated: table.rows });
-    //qualquer funcao que remova um dado de um array
-  }else{
-    res.send({ error: "Informação inexistente" });
-  }
+app.delete('/data/erase', async function(req, res){
+	const [column, value] = [req.query.column, req.query.value];
+
+	try{
+		const thereIsValue = await valueExists(value);
+		const thereIsColumn = await columnExists(column);
+
+	  if(thereIsValue && thereIsColumn){
+  	  const rowIndex = getRowIndex(value);
+			table.rows = table.rows.filter((row, index) => index !== rowIndex);
+			res.send({ updated: table.rows });
+  	}else{
+    	res.send({ error: "Informação inexistente" });
+			res.status(404);
+	  }
+	}catch(err){
+		console.log("deleteError: "+err);
+		res.status(500);
+	}
 });
 
 //CREATE

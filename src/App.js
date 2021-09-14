@@ -11,6 +11,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Paper from '@material-ui/core/Paper';
 import DataBase from './DataBase.js';
 import PlayArrow from '@material-ui/icons/PlayArrow';
+import processQuery from './processQueries.js';
 
 const commands = [
 	"CREATE-TABLE [columsArray]",
@@ -26,10 +27,6 @@ const useStyles = makeStyles(theme => ({
 		marginBottom: "3vh"
 	}
 }));
-
-function sendQuery(data){
-	//connect to server
-}
 
 export default function App(props) {
 	const classes = useStyles();
@@ -61,7 +58,7 @@ export default function App(props) {
 				<Grid item xs={2}>
 					<Button variant="contained" 
 						color="primary"
-						onClick={ () => sendQuery(query) }><PlayArrow/></Button>
+						onClick={ () => processQuery(query) }><PlayArrow/></Button>
 				</Grid>
 				<Grid item xs={11}>
 					<DataBase columns={data.columns} rows={data.rows}/>
