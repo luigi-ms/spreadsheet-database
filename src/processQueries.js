@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 const commands = {
 	select: selectFrom,
@@ -8,7 +8,7 @@ const commands = {
 	update: updateToWhere
 };
 
-function processQuery(query){
+export default function processQuery(query){
 	const com = query.substring(0, 6).toLowerCase();
 	let params = "";
 	
@@ -20,13 +20,7 @@ function processQuery(query){
 	commands[com](params);
 }
 
-function getAllData(){
-	axios.get("http://localhost:5000/all-data")
-		.then(res => console.log(res.data))
-		.catch(err => console.log("GetAllError: "+err));
-}
-
-function selectFrom([val, col]){
+function selectFrom([col, val]){
 	axios.get("http://localhost:5000/data", { params: { column: col, value: val } })
 		.then(res => console.log("Selected: "+res.data.found))
 		.catch(err => console.log("SelectError: "+err));
@@ -44,20 +38,20 @@ function insertInto(valuesArray){
 		.catch(err => console.log("InsertError: "+err));
 }
 
-function deleteWhere([col, val]){//deal with error string received but int stored
-	console.log("type: "+typeof(val));
+function deleteWhere([col, val]){
 	axios.delete("http://localhost:5000/data/erase", { params: { column: col, value: val} })
-		.then(res => console.log("Deleted: "+res.data))
+		.then(res => console.log("Deleted: "+res.data.updated))
 		.catch(err => console.log("DeleteError: "+err));
 }
 
-function updateToWhere([col, newName, id]){
-	axios.put("http://localhost:5000/data/change", { column: col, id: id, newValue: newName })
-		.then(res => console.log(res.data))
+function updateToWhere([col, newName, actualValue]){
+	axios.put("http://localhost:5000/data/change", { column: col, id: actualValue, newValue: newName })
+		.then(res => console.log("Updated: "+res.data.updated))
 		.catch(err => console.log("UpdateError: "+err));
 }
 
-processQuery("CREATE-TABLE [\"id\", \"nome\", \"cpf\"]");
-processQuery("INSERT-INTO [1, \"luigi\", \"07099519301\"]")
-getAllData();
-processQuery("DELETE-WHERE [\"id\", 1]");
+//processQuery("CREATE-TABLE [\"id\", \"nome\", \"cpf\"]");
+//processQuery("INSERT-INTO [\"1\", \"luigi\", \"07099519301\"]")
+//processQuery("SELECT-ROW-WHERE [\"id\", \"1\"]");
+//processQuery("UPDATE-TO-WHERE [\"nome\", \"miguel\", \"luigi\"]");
+//processQuery("DELETE-WHERE [\"id\", \"1\"]");

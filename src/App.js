@@ -16,8 +16,8 @@ import processQuery from './processQueries.js';
 const commands = [
 	"CREATE-TABLE [columsArray]",
 	"INSERT-INTO [valuesArray]",
-	"SELECT-FROM [value, column]",
-	"UPDATE-TO-WHERE [column, newValue, identifier]",
+	"SELECT-ROW-WHERE [column, value]",
+	"UPDATE-TO-WHERE [column, newValue, actualValue]",
 	"DELETE-WHERE [column, value]"
 ];
 

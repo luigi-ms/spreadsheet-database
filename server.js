@@ -42,12 +42,12 @@ app.get('/data', async function(req, res){
 	const [col, value] = [req.query.column, req.query.value];
 
 	try{
-		const foo = await valueExists(value);
-		const	column = await columnExists(col);
+		const thereIsValue = await valueExists(value);
+		const	thereIsColumn = await columnExists(col);
 
-		if(foo && column){
-			const [colIndex, rowIndex] = [getColumnIndex(col), getRowIndex(value)];
-			res.send({ found: table.rows[rowIndex][colIndex] });
+		if(thereIsValue && thereIsColumn){
+			const rowIndex = getRowIndex(value);
+			res.send({ found: table.rows[rowIndex] });
 		}else{
 			res.send({ error: "Informação inexistente" });
 			res.status(404);
