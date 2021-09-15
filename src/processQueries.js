@@ -1,6 +1,6 @@
 const table = {
 	columnsNames: [],
-	rows: [[]]
+	rows: []
 };
 
 const commands = {
@@ -20,7 +20,7 @@ export function processQuery(query){
 		query = query.substr(1);
 	}
 	params = JSON.parse(query);
-	commands[com](params);
+	return commands[com](params);
 }
 
 export function getAllData(){
@@ -31,21 +31,31 @@ export function getAllData(){
 }
 
 function getColumnIndex(column){
-	return table.columnsNames.findIndex(col => col === column);
+	const colIndex = table.columnsNames.findIndex(col => col === column);
+	return colIndex;
 }
 
-function getRowIndex(row){
-	return table.rows.findIndex(row => row.some(cell => cell === row));
+function getRowIndex(value){
+	const rowIndex = table.rows.findIndex(row => row.some(cell => cell === value));
+	return rowIndex;
 }
 
 function thisColumnExists(column){
-	const exists = table.columnsNames.some(col => col === column);
-	return exists ? true : false;
+	try{
+		const exists = table.columnsNames.some(col => col === column);
+		return exists ? true : false;
+	}catch(err){
+		console.log("checkColumnError: "+err);
+	}
 }
 
 function thisDatumExists(datum){
-	const exists = table.rows.some(row => row.some(cell => cell === datum));
-	return exists ? true : false;
+	try{
+		const exists = table.rows.some(row => row.some(cell => cell === datum));
+		return exists ? true : false;
+	}catch(err){
+		console.log("checkDatumError: "+err);
+	}
 }
 
 async function selectRowWhere([col, val]){
@@ -55,7 +65,7 @@ async function selectRowWhere([col, val]){
 
 		if(thereIsThisColumn && thereIsThisValue){
 			const rowIndex = getRowIndex(val);
-			return { found: table.rows[rowIndex]}
+			return { response: table.rows[rowIndex]}
 		}else{
 			return { error: "Informação inexistente" }
 		}
@@ -66,12 +76,12 @@ async function selectRowWhere([col, val]){
 
 function createTable(columnsArray){
 	table.columnsNames = columnsArray;
-	return { columns: table.columnsNames }
+	return { response: table.columnsNames }
 }
 
 function insertInto(valuesArray){
 	table.rows.push(valuesArray);
-	return { rows: table.rows }
+	return { response: table.rows }
 }
 
 async function deleteWhere([col, val]){
@@ -82,7 +92,7 @@ async function deleteWhere([col, val]){
 		if(thereIsThisColumn && thereIsThisValue){
 			const rowIndex = getRowIndex(val);
 			table.rows = table.rows.filter((row, index) => index !== rowIndex);
-			return { updated: table.rows };
+			return { response: table.rows };
 		}else{
 			return { error: "Informação inexistente" }
 		}
@@ -95,11 +105,11 @@ async function updateToWhere([col, newValue, actualValue]){
 	try{
 		const thereIsThisColumn = await thisColumnExists(col);
 		const thereIsThisValue = await thisDatumExists(actualValue);
-
+		
 		if(thereIsThisColumn && thereIsThisValue){
 			const [colIndex, rowIndex] = [getColumnIndex(col), getRowIndex(actualValue)];
 			table.rows[rowIndex][colIndex] = newValue;
-			return { updated: table.rows[rowIndex] };
+			return { response: table.rows[rowIndex] };
 		}else{
 			return { error: "Informação inexistente" };
 		}

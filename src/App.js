@@ -32,8 +32,15 @@ export default function App(props){
 	
 	let [query, setQuery] = useState('');
 	let [data, setData] = useState({ columns: [], rows: [['']] });
+	let [response, setResponse] = useState({ response: [], error: ""});
 
-	useEffect(() => setData(getAllData()), [query]);
+	useEffect(() => setData(data => {
+		return { columns: data.columns}
+	}), [data.columns]);
+
+	useEffect(() => setData(data => {
+		return { rows: data.rows}
+	}), [data.rows]);
 
   return (
 		<Grid container
@@ -44,7 +51,7 @@ export default function App(props){
 				<Typography variant="h5" align="center">SpreadSheet Database</Typography>
 			</Grid>
 			<Grid item xs={8}>
-				<TextField onBlur={ e=> setQuery(e.target.value) } 
+				<TextField onChange={ e=> setQuery(e.target.value) } 
 					label="Insira um comando SQL" 
 					variant="filled"
 					fullWidth/>
@@ -52,10 +59,12 @@ export default function App(props){
 			<Grid item xs={2}>
 				<Button variant="contained" 
 					color="primary"
-					onClick={ () => processQuery(query) }><PlayArrow/></Button>
+					onClick={ () => {
+						setResponse(processQuery(query));
+						setData(getAllData());
+					} }><PlayArrow/></Button>
 			</Grid>
 			<Grid item xs={11}>
-				<p>Query: { data.columns }</p>
 				<DataBase columns={data.columns} rows={data.rows}/>
 			</Grid>
 			<Grid item xs={10} className={classes.title}>
