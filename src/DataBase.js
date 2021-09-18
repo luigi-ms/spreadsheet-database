@@ -35,9 +35,11 @@ export default function DataBase(props){
 				<TableBody>
 				{props.rows.map(row => (
 					<TableRow align="right">{
-					row.map(cell => (
-						<TableCell className={classes.tableBodyColors}>{cell}</TableCell>
-					))}
+						row.map(cell => (
+							<TableCell className={classes.tableBodyColors}>{
+								cell
+							}</TableCell>
+						))}
 					</TableRow>
 				))}
 				</TableBody>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
@@ -10,11 +10,11 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Paper from '@material-ui/core/Paper';
 import DataBase from './DataBase.js';
 import PlayArrow from '@material-ui/icons/PlayArrow';
-import { processQuery, getAllData } from './processQueries.js';
+import processQuery from './processQueries.js';
 
 const commands = [
-	"CREATE-TABLE [columsArray]",
-	"INSERT-INTO [valuesArray]",
+	"CREATE-COLS [columsArray]",
+	"INSERT-VALUES [valuesArray]",
 	"SELECT-ROW-WHERE [column, value]",
 	"UPDATE-TO-WHERE [column, newValue, actualValue]",
 	"DELETE-WHERE [column, value]"
@@ -30,17 +30,9 @@ const useStyles = makeStyles(theme => ({
 export default function App(props){
 	const classes = useStyles();
 	
-	let [query, setQuery] = useState('');
-	let [data, setData] = useState({ columns: [], rows: [['']] });
-	let [response, setResponse] = useState({ response: [], error: ""});
-
-	useEffect(() => setData(data => {
-		return { columns: data.columns}
-	}), [data.columns]);
-
-	useEffect(() => setData(data => {
-		return { rows: data.rows}
-	}), [data.rows]);
+	let [query, setQuery] = useState("");
+	let [columns, setColumns] = useState([]);
+	let [rows, setRows] = useState({ rows: [] });
 
   return (
 		<Grid container
@@ -51,7 +43,7 @@ export default function App(props){
 				<Typography variant="h5" align="center">SpreadSheet Database</Typography>
 			</Grid>
 			<Grid item xs={8}>
-				<TextField onChange={ e=> setQuery(e.target.value) } 
+				<TextField onBlur={ e => setQuery(e.target.value) } 
 					label="Insira um comando SQL" 
 					variant="filled"
 					fullWidth/>
@@ -59,13 +51,20 @@ export default function App(props){
 			<Grid item xs={2}>
 				<Button variant="contained" 
 					color="primary"
-					onClick={ () => {
-						setResponse(processQuery(query));
-						setData(getAllData());
+					onClick={ e => {
+						const processed = processQuery(query);
+
+						if(processed.columns){
+							setColumns(processed.columns);
+						}else if(processed.updated){
+							setRows({ rows: processed.updated });
+						}else{
+							setRows({ rows: processed.rows });
+						}
 					} }><PlayArrow/></Button>
 			</Grid>
-			<Grid item xs={11}>
-				<DataBase columns={data.columns} rows={data.rows}/>
+			<Grid item xs={11}>{ console.log(rows) }
+				<DataBase columns={ columns } rows={ rows.rows } />
 			</Grid>
 			<Grid item xs={10} className={classes.title}>
 				<Paper>

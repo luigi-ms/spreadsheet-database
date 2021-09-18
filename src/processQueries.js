@@ -11,7 +11,7 @@ const commands = {
 	update: updateToWhere
 };
 
-export function processQuery(query){
+export default function processQuery(query){
 	const com = query.substring(0, 6).toLowerCase();
 	let params = "";
 	
@@ -19,15 +19,13 @@ export function processQuery(query){
 		if(c === '[') break;
 		query = query.substr(1);
 	}
-	params = JSON.parse(query);
-	return commands[com](params);
-}
 
-export function getAllData(){
-	return {
-		columns: table.columnsNames,
-		rows: table.rows
+	try{
+		params = JSON.parse(query);
+	}catch(e){
+		console.log(e);
 	}
+	return commands[com](params);
 }
 
 function getColumnIndex(column){
@@ -76,12 +74,12 @@ async function selectRowWhere([col, val]){
 
 function createTable(columnsArray){
 	table.columnsNames = columnsArray;
-	return { response: table.columnsNames }
+	return { columns: table.columnsNames };
 }
 
 function insertInto(valuesArray){
 	table.rows.push(valuesArray);
-	return { response: table.rows }
+	return { rows: table.rows };
 }
 
 async function deleteWhere([col, val]){
@@ -92,7 +90,8 @@ async function deleteWhere([col, val]){
 		if(thereIsThisColumn && thereIsThisValue){
 			const rowIndex = getRowIndex(val);
 			table.rows = table.rows.filter((row, index) => index !== rowIndex);
-			return { response: table.rows };
+			console.log("rows: "+table.rows);
+			return { rows: table.rows };
 		}else{
 			return { error: "Informação inexistente" }
 		}
@@ -109,7 +108,8 @@ async function updateToWhere([col, newValue, actualValue]){
 		if(thereIsThisColumn && thereIsThisValue){
 			const [colIndex, rowIndex] = [getColumnIndex(col), getRowIndex(actualValue)];
 			table.rows[rowIndex][colIndex] = newValue;
-			return { response: table.rows[rowIndex] };
+			console.log("updateToWhere: "+table.rows);
+			return { updated: table.rows };
 		}else{
 			return { error: "Informação inexistente" };
 		}
