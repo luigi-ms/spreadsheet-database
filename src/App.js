@@ -51,8 +51,8 @@ export default function App(props){
 			<Grid item xs={2}>
 				<Button variant="contained" 
 					color="primary"
-					onClick={ e => {
-						const processed = processQuery(query);
+					onClick={ async e => {
+						const processed = await processQuery(query);
 
 						if(processed.columns){
 							setColumns(processed.columns);
