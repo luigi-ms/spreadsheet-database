@@ -70,8 +70,8 @@ export default function App(props){
 				<Paper>
 					<Typography variant="subtitle1" align="center">Comandos disponíveis</Typography>
 					<List component="nav" aria-label="Lista de comandos disponiveis">
-					{commands.map(com => (
-						<ListItem>
+					{commands.map((com, index) => (
+						<ListItem key={index}>
 							<ListItemText primary={com}/>
 						</ListItem>
 					))}
