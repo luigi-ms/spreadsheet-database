@@ -63,7 +63,7 @@ export default function App(props){
 						}
 					} }><PlayArrow/></Button>
 			</Grid>
-			<Grid item xs={11}>{ console.log(rows) }
+			<Grid item xs={11}>
 				<DataBase columns={ columns } rows={ rows.rows } />
 			</Grid>
 			<Grid item xs={10} className={classes.title}>
